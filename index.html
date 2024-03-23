@@ -76,7 +76,7 @@
 
 <nav>
   <h1>Notícies RSS</h1>
-  <img class="image-of-the-day" src="" alt="">
+  <img class="image-of-the-day" src="" alt="Imatge del dia">
   <div id="marquee"></div>
 </nav>
 
@@ -112,6 +112,7 @@ function getImageOfDay() {
             // Asignar la URL de la imagen al elemento img
             const img = document.getElementById('image-of-the-day');
             img.src = imageUrl;
+            
 
             // Asignar el título de la imagen al elemento p
             const title = document.getElementById('image-title');
@@ -142,8 +143,10 @@ function getImageOfDay() {
           const title = item.querySelector('title').textContent;
           const link = item.querySelector('link').textContent;
           const description = item.querySelector('description').textContent;
-          const img = item.querySelector('enclosure');
-          const imgSrc = img ? img.getAttribute('url') : null;
+          const thumb = item.querySelector('thumbnail');
+          const img = item.querySelector('content');
+          
+          const imgSrc = thumb ? thumb.getAttribute('url') : img.getAttribute('url');
           
           const itemDiv = document.createElement('div');
           itemDiv.classList.add('item');
@@ -152,8 +155,8 @@ function getImageOfDay() {
           h2.textContent = title;
           
           const imgTag = document.createElement('img');
-          imgTag.src = imgSrc ? imgSrc : 'placeholder.jpg'; // Si no hi ha imatge, pots posar una imatge de substitució o gestionar-ho com prefereixis
-          
+          imgTag.src = imgSrc ? imgSrc : null;
+          imgTag.alt = "Imatge de la notícia"
           const p = document.createElement('p');
           p.textContent = description.substring(0, 100) + '...';
           
@@ -181,18 +184,31 @@ function getImageOfDay() {
   // Funció per realitzar la cerca
   function cercar() {
     const paraulaCercada = document.getElementById('search').value.toLowerCase();
-    const nodesNoticia = document.querySelectorAll('.item p');
+    const container = document.getElementById('rssContainer');
+
     
-    nodesNoticia.forEach(node => {
-      const text = node.textContent.toLowerCase();
-      const parent = node.parentElement;
-      if (text.includes(paraulaCercada)) {
-        parent.style.display = 'block';
-      } else {
-        parent.style.display = 'none';
-      }
+    const xpathExpression = `//*[contains('${paraulaCercada}')]`;
+
+
+    const resultNodes = document.evaluate(xpathExpression, container, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+
+    // Loop through the result nodes
+    for (let i = 0; i < resultNodes.snapshotLength; i++) {
+        const node = resultNodes.snapshotItem(i);
+        const parent = node.closest('.item'); 
+        if (parent) {
+            parent.style.display = 'block';
+        }
+    }
+
+    // Hide items that don't contain the search word
+    const allItems = container.querySelectorAll('.item');
+    allItems.forEach(item => {
+        if (!resultNodes.snapshotItem(item)) {
+            item.style.display = 'none';
+        }
     });
-  }
+}
 
   // Escoltar canvis en el camp de cerca
   document.getElementById('search').addEventListener('input', cercar);
