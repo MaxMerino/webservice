@@ -9,11 +9,29 @@
       font-family: Arial, sans-serif;
     }
     nav {
-      background-color: #007bff;
-      color: #fff;
-      padding: 10px 20px;
-      text-align: center;
-    }
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex; /* Cambio a flexbox */
+  align-items: center; /* Alinea verticalmente */
+  justify-content: space-between; /* Espacio entre elementos */
+}
+
+nav > div:nth-child(1) {
+  flex: 0 0 auto; /* No se estira, no se encoje, tamaño automático */
+  margin-right: 20px; /* Espacio entre la imagen y el título */
+}
+
+nav > div:nth-child(2) {
+  flex: 1; /* Se estira */
+  text-align: center; /* Centra el contenido */
+}
+
+.image-of-the-day {
+  max-width: 100%; /* La imagen se ajusta al ancho del contenedor */
+  height: auto;
+}
+
     .container {
       display: flex;
       flex-wrap: wrap;
@@ -74,11 +92,16 @@
 </head>
 <body>
 
-<nav>
-  <h1>Notícies RSS</h1>
-  <img class="image-of-the-day" src="" alt="Imatge del dia">
-  <div id="marquee"></div>
-</nav>
+  <nav>
+    <div>
+      <img id="image-of-the-day" class="image-of-the-day" src="" alt="Imatge del dia">
+    </div>
+    <div>
+      <h1>Notícies RSS</h1>
+      <div id="marquee"></div>
+    </div>
+  </nav>
+  
 
 <input type="text" id="search" placeholder="Cerca...">
 <div class="container" id="rssContainer"></div>
@@ -92,7 +115,7 @@
 
 
 function getImageOfDay() {
-        fetch('https://efe.com/foto-del-dia/')
+        fetch('https://www.nationalgeographic.com.es/fotografia/foto-del-dia/')
           .then(response => response.text())
           .then(data => {
             // Crear un objeto HTML a partir del texto recibido
@@ -100,27 +123,13 @@ function getImageOfDay() {
             const htmlDocument = parser.parseFromString(data, 'text/html');
 
             // Utilizar XPath para seleccionar la URL de la imagen del día
-            const imageUrl = htmlDocument.evaluate('string(//div[@class="post-image"]/a/img/@src)', htmlDocument, null,
-              XPathResult.STRING_TYPE, null).stringValue;
-             // Obtener el título de la imagen del día
-            const imageTitle = htmlDocument.evaluate('string(//*[@class="post-image"]/a/img/@alt)', htmlDocument, null,
-              XPathResult.STRING_TYPE, null).stringValue;
-
-            const imageLink = htmlDocument.evaluate('string(//*[@class="post-image"]/a/@href)', htmlDocument, null,
+            const imageUrl = htmlDocument.evaluate('//*[@id="nationalgeographic519670"]/picture/img/@src', htmlDocument, null,
               XPathResult.STRING_TYPE, null).stringValue;
 
             // Asignar la URL de la imagen al elemento img
             const img = document.getElementById('image-of-the-day');
             img.src = imageUrl;
             
-
-            // Asignar el título de la imagen al elemento p
-            const title = document.getElementById('image-title');
-            title.textContent = imageTitle;
-         // Asignar el título de la imagen al elemento p
-           
-            const link = document.getElementById('imatge_link');
-            link.href = imageLink;
 
           })
           .catch(error => console.error('Error:', error));
